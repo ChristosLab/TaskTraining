@@ -15,7 +15,7 @@ if nargin < 1                      %  If there are no arguments given
     datain(9) = 6;              %  Radius in degrees of target window
     datain(10) = 255;     %  ***CHANGE THIS DURING TRAINING Stimulus luminance (0-255) lEAVE AT 0, 255
     gray2= 0;           %  ***CHANGE THIS DURING TRAINING Luminence of target (for training purposes)
-    datasin ='VIK_beh004_1';
+    datasin ='';
     burst_amount = 3;
     fix_acquisition = 2;        % Time he has to start trial by looking at fixation point
     %fix_timeout = 0.25;         % Time monkey has to perfect fixation prior to imposing eye control
@@ -53,7 +53,7 @@ WaveInitDaq
 %  Calculate Pixels/Degree constants and coordinates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[vstruct, Display] = WaveDisplayParamsODR(vstruct, datain);
+[vstruct, Display] = WaveDisplayParamsODR2(vstruct, datain);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Declare Variables
@@ -73,7 +73,7 @@ correctcounter = 0;
 blockcounter = 1;
 intertrial_interval_correct = 2;
 intertrial_interval_error   = 2;
-aquisition_time = 1.2;
+aquisition_time = 0.6; % For target
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Fixation times in seconds
@@ -82,7 +82,7 @@ aquisition_time = 1.2;
 frame1 = datain(1);  %fixation time for fixation point
 frame2 = datain(2);  %fixation time for fix + target display
 frame3 = datain(3);  %fixation time for target alone display
-frame4 = datain(4); % fixation time on target until reward
+frame4 = datain(4);  %fixation time on target until reward
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Trial type, 1 = visual, 2 = memory, 3 = No Saccade
