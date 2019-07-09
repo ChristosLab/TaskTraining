@@ -2,7 +2,7 @@ function [vstruct, Display] = WaveDisplayParamsODR(vstruct, datain)
 % For use in ODR scripts
 % 10 degree stimulus in lab3
 % 12-APR-2009
-% 07-JUL-2019
+% 07-JUL-2019 CC
 
 pix=vstruct.siz./vstruct.res; %calculates the size of a pixel in cm
 vstruct.degpix=(2*atan(pix./(2*vstruct.dis))).*(180/pi);
@@ -18,7 +18,6 @@ vstruct.pixs(:,2) = vstruct.pixdeg(1,2)*coors(:,2);         % Convert y degs to 
 Display.pixs(1:1:8,:) = vstruct.pixs(8:-1:1,:);     % Invert the pixels to clockwise order
 
 % Large stimulus size
-% Display.StimSize = [round(vstruct.pixdeg(1)*(200/140)*1) round(vstruct.pixdeg(2)*(200/140)*1)];   % (100/70)               % size of the stimuli in pixels
 Display.StimSize = [round(vstruct.pixdeg(1)*(70/100)*1) round(vstruct.pixdeg(2)*(70/100)*1)]; % consistent with prosaccade task,xzhou
 Display.FixSize = [5 5];
 Display.Lum  = datain(10)/100;
