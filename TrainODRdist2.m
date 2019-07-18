@@ -1,32 +1,33 @@
-function TrainODRdist2(varargin)
-%  Modified from TrainODR2, 07/08/2019, JZ & CC
-%  For training ODR task with distractor(s)
-%  TrainODR2 was created by Travis Meyer, 05-19-04
-%  TrainODR2 was modified on 3/10/09: Correct trials are based on completed trials only
-  
+function TrainODR(varargin)
+%  Travis Meyer 05-19-04
+%     Now user can only break out of the program during intertrial interval
+%  Modified 3/10/09: Correct trials are based on completed trials only
+% 15-JUL-2019 Distractor stimulus presentation fixed / randomized;
+% 17-JUL-2019 Distrctor location saved (degree2)
 [mousex,mousey] = getmouse;
 warning off all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargin < 1                      %  If there are no arguments given
-    datain(1:4) = [1.0 0.5 1.25 0.2];    %  Frame3 is the duration of delay periods before and after the distractor.
-    datain(5) = 4;                 %  Trial type, 1 = visual, 2 = memory, 3 = No Saccade, 4 = Saccade
+    datain(1:4) = [1.0 0.5 1.25 0.2];    %  ***CHANGE THIS DURING TRAINING  Default waiting times for each frame [1 0.5 3 0.2]
+    datain(5) = 4;                 %  Trial type
     datain(6) = 20;                %  Number of blocks
-    datain(7) = 10;                %  Stimulus eccentricity
-    datain(8) = 3;                 %  Radius in degrees of Fixation Window
-    datain(9) = 6;                 %  Radius in degrees of target window
-    datain(10) = 255;              %  Stimulus luminance
-    gray2= 8;                      %  Distractor luminence (0-255)
-    datasin ='';                   %  Output filename
-    burst_amount = 1;
-    fix_acquisition = 2;        % Time monkey has to start trial by looking at fixation point, in second
-   % fix_timeout = 0.25;         % Time monkey has to perfect fixation prior to imposing eye control, in second
+    datain(7) = 10;             %  Stimulus eccentricity
+    datain(8) = 3;     %  ***CHANGE THIS DURING TRAINING   Radius in degrees of Fixation Window
+    datain(9) = 6;              %  Radius in degrees of target window
+    datain(10) = 255;     %  ***CHANGE THIS DURING TRAINING Stimulus luminance (0-255) lEAVE AT 0, 255
+    gray2= 255;           %  ***CHANGE THIS DURING TRAINING Luminence of distractor (for training purposes)
+    distlocdiametric = 0;  %  if this is set to 1, then distractor is diametric; otherwise, it is random 
+    datasin ='RandDist_UNI_003_1';
+    burst_amount = 3;
+    fix_acquisition = 2;        % Time he has to start trial by looking at fixation point
+    %fix_timeout = 0.25;         % Time monkey has to perfect fixation prior to imposing eye control
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   Visual Settings
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     vstruct.res = [1280 1024];    % screen resolution
-    vstruct.siz = [61 46];        % screen size in cm
+    vstruct.siz = [61 46];        % screen size in cm  %[61 55]
     vstruct.dis = 60;             % viewing distance in cm
     vstruct.voltage = 3.5;        % Analog to degree conversion constant
     vstruct.radius = datain(7);   % Stimulus excentricity
@@ -55,7 +56,7 @@ WaveInitDaq
 %  Calculate Pixels/Degree constants and coordinates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[vstruct, Display] = WaveDisplayParamsODR2(vstruct, datain); %  Display function for lab 2
+[vstruct, Display] = WaveDisplayParamsODR2(vstruct, datain);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Declare Variables
@@ -81,13 +82,13 @@ aquisition_time = 2;
 % Fixation times in seconds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-frame1 = datain(1);  %  fixation time for fixation point
-frame2 = datain(2);  %  fixation time for fix + target display
-frame3 = datain(3);  %  fixation time for target alone display
-frame4 = datain(4);  %  fixation time on target until reward
+frame1 = datain(1);  %fixation time for fixation point
+frame2 = datain(2);  %fixation time for fix + target display
+frame3 = datain(3);  %fixation time for target alone display
+frame4 = datain(4); % fixation time on target until reward
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Trial type, 1 = visual, 2 = memory, 3 = No Saccade, 4 = Saccade
+% Trial type, 1 = visual, 2 = memory, 3 = No Saccade
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 trialtype = datain(5);
@@ -201,23 +202,25 @@ try
                 WaveDisplayStimulus(f, window)                
                 WaveUpdateEyeDisplay(fRect, FixWindowSize, fRect,vstruct, hLine,'on')
                 breaktime = getsecs;
-                %  Give subject 2 seconds to move to the fixation window
+                %  Give subject 2 seconds to move to fixation window
                 while (FixState <= 0) & ((getsecs - breaktime) < fix_acquisition)
                     [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);    
                     [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
                 end
-                %  If subject doesn't get to window within 2 seconds or break button is pushed, break out of trial
+                %  If subject didn't get to window within 2 seconds, or break
+                %  button was pushed, break out of trial
                 if FixState == 0
                     break;
                 end
                 Statecode = 2;
                 breaktime = getsecs;
-                %  Once monkey saccades near fixation pont give him some time to perfect fixation,
-                %  before checking eye position in earnest
-                % while (FixState == 1) & ((getsecs - breaktime) < fix_timeout)
+                %  Once monkey saccades near fixation pont give him some
+                %  time to perfect fixation, before checking eye position
+                %  in earnest
+                %while (FixState == 1) & ((getsecs - breaktime) < fix_timeout)
                 [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
-                % end 
-                %  Eye must stay within fixation window for frame1 duration
+                %end 
+                %  Eye must stay within fixation window for frame1 time
                 while (FixState == 1) & ((getsecs - breaktime) < frame1)
                     [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                     [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
@@ -231,7 +234,8 @@ try
                 WaveDisplayStimulus(sf(Deg), window)
                 WaveUpdateEyeDisplay(wRect(Deg,:), FixWindowSize, fRect, vstruct, hLine,'on')                     
                 breaktime = getsecs;
-                %  Check that eye stays within fixation window for frame2 duration
+                %  Check that mouse stays within fixation window for frame2
+                %  duration
                 while (FixState == 1) & ((getsecs - breaktime) < frame2)
                     [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                     [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
@@ -242,7 +246,8 @@ try
                 Statecode = 4;
                 %  Depending on the trial, the next frames are differ
                 switch trialtype
-                    case (1)  %  Visually guided movement
+                    %  Visually guided movement
+                    case (1)
                         FixState = 0;
                         %  Display only stimulus
                         WaveDisplayStimulus(s(Deg), window)
@@ -259,7 +264,7 @@ try
                         end
                         Statecode = 5;
                         breaktime = getsecs;
-                        %  Check that eye stays in window for frame3 time
+                        %  Check that mouse stays in window for frame3 time
                         while (FixState == 1) & ((getsecs - breaktime) < frame3)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(tCenter(Deg,:), Display.FixationWindow, ai, vstruct);
@@ -270,9 +275,10 @@ try
                             BreakTwice =1;
                             break;
                         end
-                    case(2)  %  Memory guided movement
+                        %  Memory guided movement
+                    case(2)
                         FixState = 0;
-                        % Display an all black screen
+                        %  Display an all black screen
                         SCREEN(window,'WaitBlanking');
                         Screen(window,'FillRect',black);
                         WaveUpdateEyeDisplay(wRect(Deg,:), FixWindowSize, wRect(Deg,:), vstruct, hLine,'on')
@@ -295,15 +301,16 @@ try
                             [FixState] = CheckFixation(tCenter(Deg,:), Display.FixationWindow, ai, vstruct);
                         end                 
                         if FixState == 0
-                            BreakTwice = 1;
+                            BreakTwice =1;
                             break;
-                        end    
-                    case(3)   %  No movement required
+                        end
+                        %  No movement required
+                    case(3)
                         %  Display fixation only
                         WaveDisplayStimulus(f, window)
                         WaveUpdateEyeDisplay(fRect, FixWindowSize, fRect, vstruct, hLine,'on')
                         breaktime = getsecs;
-                        %  Make sure eye stays in window for frame3 time
+                        %  Make sure mouse stays in window for frame3 time
                         while (FixState == 1) & ((getsecs - breaktime) < frame3)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
@@ -313,34 +320,41 @@ try
                             BreakTwice =1;
                             break;
                         end
+                        
                         Result = 1;
-                    case(4)  %  Saccade to invisible target & ignore cue and distractor
-                        %  Display fixation only (delay period before the distractor)
+                    case(4)   % Saccade to visible, second stimulus (for training purposes)
+                        %  Display fixation only
                         WaveDisplayStimulus(f, window)
                         WaveUpdateEyeDisplay(fRect, FixWindowSize, fRect, vstruct, hLine,'on')
                         breaktime = getsecs;
-                        %  Make sure eye stays in window for frame3 duration
+                        %  Make sure mouse stays in window for frame3 time
                         while (FixState == 1) & ((getsecs - breaktime) < frame3)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
                         end
                         RectionTime = 0;
                         if FixState == 0
-                            BreakTwice = 1;
+                            BreakTwice =1;
                             break;
                         end
-                        Statecode = 6;
+                        Statecode=6;
                         FixState == 0;
-                        % 2nd stimulus (distractor) location generator
-                        Deg2=Deg+180;
+                        %display 2nd stimulus & fixation
+                        if distlocdiametric == 1
+                            Deg2=Deg+180;
+                        else 
+                            Deg2=vstruct.angs(Randi(8));
+                        end
                         if Deg2>360
                             Deg2=Deg2-360;
                         end
-                        %  Display 2nd stimulus (distractor) & fixation
+                        AllData.block(blockcounter).trial(trialcounter).degree2 = Deg2;
+                        
                         WaveDisplayStimulus(secstim(Deg2), window)
                         WaveUpdateEyeDisplay(wRect(Deg2,:), FixWindowSize, fRect, vstruct, hLine,'on')                     
                         breaktime = getsecs;
-                        %  Check that eye stays within fixation window for frame2 duration
+                        %  Check that mouse stays within fixation window for frame2
+                        %  duration
                         while (FixState == 1) & ((getsecs - breaktime) < frame2)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
@@ -350,11 +364,11 @@ try
                         end
                         Statecode = 7;
                         FixState == 0;
-                        %  Display fixation only (delay period after the distractor)
+                        %  Display fixation only
                         WaveDisplayStimulus(f, window)
                         WaveUpdateEyeDisplay(fRect, FixWindowSize, fRect, vstruct, hLine,'on')
                         breaktime = getsecs;
-                        %  Make sure eye stays in window for frame3 time
+                        %  Make sure mouse stays in window for frame3 time
                         while (FixState == 1) & ((getsecs - breaktime) < frame3)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(fCenter, Display.FixationWindow, ai, vstruct);
@@ -364,11 +378,12 @@ try
                             BreakTwice =1;
                             break;
                         end
-                        Statecode = 8;
-                        FixState = 0; % ???
-                        %  Monkey fixed through the entire trial - now needs to saccade
+                        Statecode=8;
+                        FixState = 0;
+                        % Monkey fixed through the entire trial - now needs to saccade
                         completedcounter=completedcounter+1;  
-                        %  Display an all black screens
+                        %  Display only stimulus
+                        %                         WaveDisplayStimulus(secstim(Deg), window)
                         Screen(window,'FillRect',black);
                         WaveUpdateEyeDisplay(wRect(Deg,:), TarWindowSize, wRect(Deg,:), vstruct, hLine,'on')
                         breaktime = getsecs;
@@ -381,15 +396,16 @@ try
                             BreakTwice = 1;
                             break;
                         end
-                        Statecode = 5; % ???
+                        Statecode = 5;
                         breaktime = getsecs;
-                        %  Check that eye stays in target window for frame4 duration
+                        %  Check that mouse stays in window for frame3 time
                         while (FixState == 1) & ((getsecs - breaktime) < frame4)
                             [eyeX, eyeY] = DisplayEye(Display, hAxes, hLine, ai);
                             [FixState] = CheckFixation(tCenter(Deg,:), Display.TargetWindow, ai, vstruct);
                         end
                         if FixState == 0
-                            %  If an error occurred, break out of the switch and the while loop.
+                            %  If an error occurred, break out of the switch
+                            %  and the while loop.
                             BreakTwice =1;
                             break;
                         end
@@ -404,6 +420,7 @@ try
             end
             putvalue(dio, [0 0 0 0 0 0 0 0]);
             Screen(window,'FillRect',black)  % Clear screen
+            
             WaveUpdateEyeDisplay(fRect, FixWindowSize, fRect,vstruct, hLine, 'off')
             if Result == 1
                 [AllData.block(blockcounter).trial(trialcounter).EyeData(:,1:2), ...
