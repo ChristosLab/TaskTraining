@@ -20,6 +20,8 @@ function TrainAntiSaccadeLab2(varargin)
 % save behavior file for overlap to make sure after several weeks
 % training, monkeys behavior are stable, then recording can start
 
+% Reaction time = TargetIn - CueOff
+
 
 [mousex,mousey] = getmouse;
 warning off all
