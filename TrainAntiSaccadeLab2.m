@@ -20,7 +20,7 @@ function TrainAntiSaccadeLab2(varargin)
 % save behavior file for overlap to make sure after several weeks
 % training, monkeys behavior are stable, then recording can start
 
-% Reaction time = TargetIn - CueOff
+% Reaction time = TargetIn - CueOff?
 
 
 [mousex,mousey] = getmouse;
@@ -30,7 +30,7 @@ clc
 SizeofStim = 0.74;% XQ, size 2 degree
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargin < 1                      %  If there are no arguments given
-    datain(1:4) = [1 0.1 0 0.2];    %  Default waiting times for each frame
+    datain(1:4) = [1 0.1 0 0.1];   %  Default waiting times for each frame
     datain(5) = 3;                 %  Trial type
     datain(6) = 50;                %  Number of blocks
     datain(7) = 10;                %  Stimulus eccentricity
