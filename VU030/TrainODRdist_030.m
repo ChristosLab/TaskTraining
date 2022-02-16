@@ -1,5 +1,5 @@
-% TrainBiasedODR_030
-% based on TrainODR_023. JZ 20220117
+% TrainODRDist_030
+% based on TrainODR_030. JZ 20220216
 clear
 close all
 % warning off all
@@ -10,46 +10,37 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'TrainBiasedODR_030_v0.1_01_17_22' ; % after code changes, change version
+Version = 'TrainODRDist_030_v0.1_02_16_22' ; % after code changes, change version
 
 %% Parameters
 
-loc_mean = 12;                 % In degree, change before run
-datain(1:4) = [1, 0.5, 3.0, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
+cue_loc = 1;                 % Change before run. 1 for card, 2 for diag, 3 for both
+datain(1:4) = [1, 0.5, 0.5, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
-datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
+datain(6) = 10;                % Number of blocks
 datain(7) = 10;                % Stimulus eccentricity
 datain(8) = 3;                 % Radius in degree of fixation window
 datain(9) = 6;                 % Radius in degree of target window
 datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 4;
+num_burst = 1;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
 intertrial_interval_error = 2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  The von Mises distribution parameters
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-loc1 = loc_mean/180*pi; % to radius
-loc2 = angle(exp(1i*(loc1+pi)));   % diametrically opposed location
-loc = [loc1, loc2];
-kappa = [1.4, 1.4];
-w = [0.5, 0.5];    % two locations weighted
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Define feature classes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-n_class = 120; % 360/3
 stim_radius = 10; %datain(7); % Stimulus eccentricity
 % The stimuli are described on a R-hand Cartesian coordinate system in
 % units of degrees of viewing angle
-[ClassStructure, p, alpha, AllList] = CreateClassStructure_ODR_vm_030(stim_radius, n_class, loc, kappa, w);
+[ClassStructure] = CreateClassStructure_ODR_dist_030(stim_radius, cue_loc);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Visual settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 vstruct.res = [1920 1080];    % screen resolution
-vstruct.siz = [94 53];        % screen size in cm
-vstruct.dis = 69;            % viewing distance in cm
+vstruct.siz = [];        % screen size in cm
+vstruct.dis = 68;            % viewing distance in cm
 vstruct.radius = stim_radius;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Output settings
@@ -61,7 +52,7 @@ else
     save_name = output_file_names{1};
 end
 check_go = 1;
-file_name_check = ['C:\Users\cclab\Documents\MATLAB\beh\' save_name '.mat'];
+file_name_check = ['C:\Users\CCLAB\Documents\MATLAB\Behavioral_Data\' save_name '.mat'];
 file_check = dir(file_name_check);
 if ~isempty(file_check)
     button = questdlg('File name exists, do you want to continue?',...
@@ -318,7 +309,7 @@ end
 % catch
 %     lasterror
 % end
-save(['C:\Users\cclab\Documents\MATLAB\beh\' save_name],'AllData');
+save(['C:\Users\CCLAB\Documents\MATLAB\Behavioral_Data\' save_name],'AllData');
 % clear
 %CleanUp
 
