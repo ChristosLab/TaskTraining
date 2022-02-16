@@ -10,13 +10,13 @@ if nargin < 2
     thetahat = [0 pi];
 end
 if nargin < 1 || isempty(nsample)
-    nsample= 90;
+    nsample = 90;
 end
 
-nClass =0;
-alpha = linspace(0, 2*pi, nsample+1)';% how many degree per class
+nClass = 0;
+alpha = linspace(0, 2*pi, nsample+1)';  % how many degree per class
 alpha = alpha(1:end-1);
-[p, alpha] = circ_vmpdf_030(alpha, thetahat, kappa,w);
+[p, alpha] = circ_vmpdf_030(alpha, thetahat, kappa, w);
 maxTrial = max(500,length(alpha)*5);
 AllP =round(p/sum(p)*length(alpha)*round(maxTrial/length(alpha)));
 AllList=[];

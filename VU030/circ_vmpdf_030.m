@@ -1,4 +1,4 @@
-function [p,alpha] = circ_vmpdf_030(alpha, thetahat, kappa,w)
+function [p,alpha] = circ_vmpdf_030(alpha, thetahat, kappa, w)
 
 % [p alpha] = circ_vmpdf(alpha, w, p)
 %   Computes the circular von Mises pdf with preferred direction thetahat 
@@ -47,4 +47,4 @@ for idx=1:length(kappa)
     p(:,idx) = C .* exp(kappa(idx).*cos(alpha-thetahat(idx)));
 end
 % p = mean(p,2);
-p= p * w(:);%xq weighted for multiple distributions
+p= p * w(:);    % xq weighted for multiple distributions

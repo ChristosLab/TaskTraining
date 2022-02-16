@@ -14,12 +14,6 @@ ai.NotifyWhenDataAvailableExceeds = 1;
 DO=daq.createSession('ni');
 Dch=addDigitalChannel(DO,'Dev1','Port0/Line0:7','OutputOnly');
 
-%%
-addpath('OpenEphys');
-url = 'tcp://10.32.133.176:5556'; % or, e.g., //'tcp://10.71.212.19:5556 if GUI runs on another machine...
-tcp_handle = zeroMQwrapper('StartConnectThread',url);
-%%
-
 % function saveeyeData(src,event)
 % global trial_eye_data
 % trial_eye_data=[trial_eye_data;event.Data];

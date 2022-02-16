@@ -14,16 +14,16 @@ Version = 'TrainBiasedODR_030_v0.1_01_17_22' ; % after code changes, change vers
 
 %% Parameters
 
-loc_mean = 45;                 % In degree, change before run
+loc_mean = 66;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3.0, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
 datain(7) = 10;                % Stimulus eccentricity
-datain(8) = 3;                 % Radius in degree of fixation window
-datain(9) = 6;                 % Radius in degree of target window
-datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
+datain(8) = 30;                 % Radius in degree of fixation window
+datain(9) = 60;                 % Radius in degree of target window
+datain(10) = 0;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 4;
+num_burst = 2;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
@@ -80,7 +80,6 @@ end
 if ~check_go
     return
 end
-
 %% Initialization
 
 % Initialize eye display figure
@@ -139,7 +138,7 @@ AllData.starttime = GetSecs;
 %   channel 5 on and off every stimuli appearance
 
 %% Main Code
-
+zeroMQwrapper('Send',tcp_handle, save_name);
 WaitSecs(2);
 while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
     trialcounter = 1;
@@ -321,7 +320,8 @@ end
 save(['C:\Users\cclab\Documents\MATLAB\beh\' save_name],'AllData');
 % clear
 %CleanUp
-
+zeroMQwrapper('Send',tcp_handle , [save_name, '_end_of_session']);
+zeroMQwrapper('CloseThread',tcp_handle);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [Figdata, hFig, hAxes, hLine] = InitEyeDisplay
 btnColor=get(0,'DefaultUIControlBackgroundColor');
