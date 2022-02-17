@@ -11,7 +11,7 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'TrainBiasedODR_030_v0.1_01_17_22' ; % after code changes, change version
+Version = 'RecordBiasedODR_030_v0.1_02_09_22' ; % after code changes, change version
 
 %% Parameters
 
