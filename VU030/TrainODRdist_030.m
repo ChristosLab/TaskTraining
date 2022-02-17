@@ -15,14 +15,15 @@ Version = 'TrainODRDist_030_v0.1_02_16_22' ; % after code changes, change versio
 %% Parameters
 
 cue_loc = 1;                 % Change before run. 1 for card, 2 for diag, 3 for both
-datain(1:4) = [1, 0.5, 0.5, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
+datain(1:4) = [1, 1, 1, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 10;                % Number of blocks
 datain(7) = 10;                % Stimulus eccentricity
-datain(8) = 3;                 % Radius in degree of fixation window
-datain(9) = 6;                 % Radius in degree of target window
-datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
+datain(8) = 30;                 % Radius in degree of fixation window
+datain(9) = 60;                 % Radius in degree of target window
+datain(10) = 100;              % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
+datain(11) = 100;              % distractor luminance as percentage (1 - 100) of color depth (typically 0 - 255)
+datain(12) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 num_burst = 1;
 fix_aquisition = 1;
 target_aquisition = 0.6;
@@ -39,7 +40,7 @@ stim_radius = 10; %datain(7); % Stimulus eccentricity
 %   Visual settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 vstruct.res = [1920 1080];    % screen resolution
-vstruct.siz = [];        % screen size in cm
+vstruct.siz = [94 53];        % screen size in cm
 vstruct.dis = 68;            % viewing distance in cm
 vstruct.radius = stim_radius;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +53,7 @@ else
     save_name = output_file_names{1};
 end
 check_go = 1;
-file_name_check = ['C:\Users\CCLAB\Documents\MATLAB\Behavioral_Data\' save_name '.mat'];
+file_name_check = ['C:\Users\CCLAB\Documents\MATLAB\Beh\' save_name '.mat'];
 file_check = dir(file_name_check);
 if ~isempty(file_check)
     button = questdlg('File name exists, do you want to continue?',...
@@ -83,6 +84,9 @@ WaitSecs(0.1);
 outputSingleScan(DO,[0,0,0,0,0,0,0,0]);
 %  Calculate Pixels/Degree constants and coordinates
 [vstruct, Display] = WaveDisplayParams_030(vstruct, datain);
+if numel(Display.Lum) ~= 3  % check parameters
+    Display.lum = datain(10:12)./100;
+end
 %  Initialize Variables
 FixWindowSize(1,:) = datain(8)*Figdata.xcoord;
 FixWindowSize(2,:) = datain(8)*Figdata.ycoord;
@@ -90,16 +94,17 @@ TargWindowSize(1,:) = datain(9)*Figdata.xcoord;
 TargWindowSize(2,:) = datain(9)*Figdata.ycoord;
 %   Initialize trial info
 total_blocks = datain(6);
-total_trials = length(AllList);
-real_trials = AllList;
 BreakState = 0;
 output_counter = 0;
 save_counter = 1;
 correct_counter = 0;
 block_counter = 1;
 gate_off_time = .1;
+fix_aquisition = 1;
+target_aquisition = 0.6; 
 black = BlackIndex(0);
 ReactionTime = 0;
+total_trials = numel(ClassStructure);
 % Stimulus Windows
 [window, f, r, WindowStructure, AllCoordinates] = CreateWindowStructODR_030(Display, vstruct, ClassStructure);
 
@@ -108,7 +113,6 @@ ReactionTime = 0;
 AllData.parameters.Display = Display;
 AllData.version = Version;
 AllData.ClassStructure = ClassStructure;
-AllData.ClassDistribution = real_trials;
 AllData.parameters.fixationDuration = datain(1);
 AllData.parameters.stimulusDuration = datain(2);
 AllData.parameters.delayDuration = datain(3);
@@ -133,183 +137,190 @@ AllData.starttime = GetSecs;
 
 WaitSecs(2);
 while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
-    trialcounter = 1;
-    repeat_counter = 1;
-    output_counter = output_counter + 1;
-    dataout(output_counter,1:7) = {'Trial' 'Class #' 'Correct' ...
-        'Success' '%' 'Notes','State'}
-    IndexHist = zeros(1, total_trials); % init the index shuffle
-    IndexTotl = randperm(total_trials); % shuffle indeces of real_trials
-    CurrentClass = real_trials(IndexTotl(1)); % pick the respective Class
-    
-    while (repeat_counter <= total_trials) && (BreakState ~= 1) % each trial
-        %   New instance of eye data
-        outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
-        AllData.trials(save_counter).time = GetSecs;
-        AllData.trials(save_counter).Class = CurrentClass;
-        AllData.outputcounter = output_counter;
+    while (BreakState ~= 1) && (block_counter <= total_blocks)
+        trial_counter = 1;
+        repeat_counter = 1;
         output_counter = output_counter + 1;
-        trial_eye_data      = [];
-        trial_eye_timestamp = [];
-        startBackground(ai);
-        WaitSecs(gate_off_time)
-        %   Start new listener session on NIDAQ
-        %   trial_eye_data
-        all_eye = [];
-        all_eyetime = [];
-        trial_start = GetSecs;
-        %%  Trial loop parameters
-        %   Required duration of fixation
-        frame_time_queue = datain(1: 4);         %   {'Fixation'; 'Cue'; 'Delay'; 'Target'}
-        %   Off-screen windows to be copied for each frame
-        window_queue = {f; WindowStructure(CurrentClass).frame(1).end; ...
-            f; WindowStructure(CurrentClass).frame(2).end};
-              
-        eye_display_queue = {...
-            AllCoordinates.fRect, FixWindowSize; ...
-            AllCoordinates.fRect, FixWindowSize; ...
-            AllCoordinates.fRect, FixWindowSize; ...
-            AllCoordinates.cRect(CurrentClass, :, 2), TargWindowSize};
-        %   Audio to be played (if any) at the time of window copying (e.g. fixon.wav)
-%         audio_queue = {'', []; '', []; '', []; '', []};
-        %   Max lead time allowed between window copying and fixation on
-        aqusition_time_queue  = [fix_aquisition; 0; 0; target_aquisition];
-        %   Requred fixation window center and size in visual degrees (and thus in
-        %   R-hand coordinates)
-        eye_target_queue = {...
-            [0, 0], [Display.FixationWindow]; ... % Fixation epoch
-            [0, 0], [Display.FixationWindow]; ... % Cue epoch
-            [0, 0], [Display.FixationWindow]; ... % Delay epochs
-            ClassStructure(CurrentClass).frame(1).stim(1).end, [Display.TargetWindow]};    % Target epoch
-        time_stamp_queue = [];
-        Statecode = 0;
-        FixState = 0;
-        Result = 0;
-        Statecode = Statecode + 1;
-        %%  Core loop
-        for frame_idx = 1:numel(window_queue)
-            %   Step 1: Display current window
-            outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
-            Screen('CopyWindow',window_queue{frame_idx},window);
-            Screen(window,'Flip');
-            %   Screen updating timestamps ('CueOn', 'TargetOn' etc.)
-            time_stamp_queue(Statecode) = GetSecs;
+        dataout(output_counter,1:7) = {'Trial' 'Class #' 'Correct' ...
+            'Success' '%' 'Notes','State'}
+        IndexHist = zeros(1,total_trials);
+        IndexTotl = randperm(length(ClassStructure));
+        CurrentClass = IndexTotl(1);
+
+        while (repeat_counter <= total_trials) && (BreakState ~= 1) % Each trial
+            %   New instance of eye data
             outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
-            %                 wavesoundplay(audio_queue{frame_idx, 1}, audio_queue{frame_idx, 1});
-            UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'on')
-            %   Step 2: Aquire fixation (if allowed)
-            breaktime = GetSecs;
-            if aqusition_time_queue(frame_idx) > 0
-                FixState = 0;
-                while (FixState <= 0) && ((GetSecs - breaktime) < aqusition_time_queue(frame_idx))
+            AllData.trials(save_counter).time = GetSecs;
+            AllData.trials(save_counter).Class = CurrentClass;
+            AllData.outputcounter = output_counter;
+            output_counter = output_counter + 1;
+            trial_eye_data      = [];
+            trial_eye_timestamp = [];
+            startBackground(ai);
+            WaitSecs(gate_off_time)
+            %   Start new listener session on NIDAQ
+            %   trial_eye_data
+            all_eye = [];
+            all_eyetime = [];
+            trial_start = GetSecs;
+            %%  Trial loop parameters
+            %   Required duration of fixation
+            frame_time_queue = [datain(1), datain(2), datain(3), datain(2), datain(3), datain(4)];  %   {'Fixation'; 'Cue'; 'Delay'; 'Dist(Cue)'; 'Delay'; 'Target'}
+            %   Off-screen windows to be copied for each frame
+            window_queue = {f; WindowStructure(CurrentClass).frame(1).end; ...
+                f; WindowStructure(CurrentClass).frame(2).end;...
+                f; WindowStructure(CurrentClass).frame(3).end}; %   same order as frame time queue
+
+            eye_display_queue = {...
+                AllCoordinates.fRect, FixWindowSize; ...    % Fixation epoch
+                AllCoordinates.fRect, FixWindowSize; ...    % Cue epoch
+                AllCoordinates.fRect, FixWindowSize; ...    % Delay epochs
+                AllCoordinates.fRect, FixWindowSize; ...    % Dist epochs
+                AllCoordinates.fRect, FixWindowSize; ...    % Delay2 epochs
+                AllCoordinates.cRect(CurrentClass, :, 3), TargWindowSize};  % Target epoch
+            %   Audio to be played (if any) at the time of window copying (e.g. fixon.wav)
+            %         audio_queue = {'', []; '', []; '', []; '', []};
+            %   Max lead time allowed between window copying and fixation on
+            aqusition_time_queue  = [fix_aquisition; 0; 0; 0; 0; target_aquisition];    % match the frames respectively
+            %   Requred fixation window center and size in visual degrees (and
+            %   thus in R-hand coordinates)
+            eye_target_queue = {...
+                [0, 0], [Display.FixationWindow]; ... % Fixation epoch
+                [0, 0], [Display.FixationWindow]; ... % Cue epoch
+                [0, 0], [Display.FixationWindow]; ... % Delay epochs
+                [0, 0], [Display.FixationWindow]; ... % Dist epochs
+                [0, 0], [Display.FixationWindow]; ... % Delay2 epochs
+                ClassStructure(CurrentClass).frame(3).stim(1).end, [Display.TargetWindow]}; % Target epoch
+            time_stamp_queue = [];
+            Statecode = 0;
+            FixState = 0;
+            Result = 0;
+            Statecode = Statecode + 1;
+            %%  Core loop
+            for frame_idx = 1:numel(window_queue) % Each frame in a trial
+                %   Step 1: Display current window
+                outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
+                Screen('CopyWindow',window_queue{frame_idx},window);
+                Screen(window,'Flip');
+                %   Screen updating timestamps ('CueOn', 'TargetOn' etc.)
+                time_stamp_queue(Statecode) = GetSecs;
+                outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
+                %                 wavesoundplay(audio_queue{frame_idx, 1}, audio_queue{frame_idx, 1});
+                UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'on')
+                %   Step 2: Aquire fixation (if allowed)
+                breaktime = GetSecs;
+                if aqusition_time_queue(frame_idx) > 0
+                    FixState = 0;
+                    while (FixState <= 0) && ((GetSecs - breaktime) < aqusition_time_queue(frame_idx))
+                        DisplayEye(Display, hAxes, hLine);
+                        [FixState] = CheckFixation(eye_target_queue{frame_idx, 1}, eye_target_queue{frame_idx, 2}, Display);
+                    end
+                    if (FixState == 0)
+                        break
+                    end
+                    %   Aquiring new fixation means +1 Statecode
+                    Statecode = Statecode + 1;
+                    %   Fixation in timestamps
+                    time_stamp_queue(Statecode) = GetSecs;
+                end
+                %   Step3: Maintain fixation
+                breaktime = GetSecs;
+                while (FixState == 1) && ((GetSecs - breaktime) < frame_time_queue(frame_idx))
                     DisplayEye(Display, hAxes, hLine);
                     [FixState] = CheckFixation(eye_target_queue{frame_idx, 1}, eye_target_queue{frame_idx, 2}, Display);
                 end
                 if (FixState == 0)
                     break
                 end
-                %   Aquiring new fixation means +1 Statecode
+                % Successful maintanance of fixation means +1 Statecode
                 Statecode = Statecode + 1;
-                %   Fixation in timestamps
-                time_stamp_queue(Statecode) = GetSecs;
             end
-            %   Step3: Maintain fixation
+            %% Trial end
+            finish_Statecode = sum(aqusition_time_queue > 0) + numel(aqusition_time_queue) + 1;
+            if Statecode == finish_Statecode
+                Result = 1;
+                %     wavesoundplay('correct.wav',0.6);
+            elseif Statecode == finish_Statecode - 2 % Not moving to target location
+                Result = 0;
+                %     wavesoundplay('wrong.wav',0.6);
+            else %  Aborted trial before target epoch
+                Result = 0;
+                %         wavesoundplay('abort.wav',0.8);
+            end
+            % End-of-trial screen
             breaktime = GetSecs;
-            while (FixState == 1) && ((GetSecs - breaktime) < frame_time_queue(frame_idx))
+            outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
+            Screen('CopyWindow',r,window);
+            Screen(window,'Flip');
+            outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
+            UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'off')
+            AllData.trials(save_counter).EndofTrialtime = GetSecs;  %  end of trial time, same as fixoff time in passive task
+            AllData.trials(save_counter).timestamp_queue = time_stamp_queue;
+            AllData.trials(save_counter).Statecode = Statecode;
+            if Result == 1  %  correct trial, give reward
+                AllData.trials(save_counter).Reward = 'Yes';
+                correct_counter = correct_counter + 1;
+                dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 1, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
+                for burst = 1:num_burst
+                    outputSingleScan(DO, [1 0 0 0 0 0 1 0]);
+                    WaitSecs(0.65);
+                    outputSingleScan(DO, [0 0 0 0 0 0 1 0]);
+                    WaitSecs(0.10);
+                end
+                intertrial_interval = intertrial_interval_correct - gate_off_time;
+                repeat_counter = repeat_counter + 1;
+                IndexHist(CurrentClass) = CurrentClass; % store correct trial class indices
+            else
+                AllData.trials(save_counter).Reward = 'No';
+                dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 0, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
+                intertrial_interval = intertrial_interval_error - gate_off_time;
+            end
+            %   Logging NIDAQ listener output
+            all_eye     = trial_eye_data;
+            all_eyetime = trial_eye_timestamp;
+            %   Stops and flushes the NIDAQ listener until the next trial
+            %   all_eyetime now starts at 0 each trial
+            eyeX = (((all_eye(:,1)-Display.Xscalecenter).*Display.Xscale));
+            eyeY = (((all_eye(:,2)-Display.Yscalecenter).*Display.Yscale));
+            set(hLine(4), 'XData',all_eyetime,...
+                'YData', eyeX);
+            set(hLine(5), 'XData',all_eyetime,...
+                'YData', eyeY);
+            set(hAxes(2),'YLim', [-15 15],'XLim', [0 sum(datain(1:4)) + fix_aquisition + target_aquisition]);
+            set(hAxes(3),'YLim', [-15 15],'XLim', [0 sum(datain(1:4)) + fix_aquisition + target_aquisition]);
+            drawnow
+            %   Remaining trials shuffling
+            IndexTotl = randperm(total_trials);
+            IndexTemp = IndexTotl(~ismember(IndexTotl,IndexHist));  % delete previous correct trial class index
+            if ~isempty(IndexTemp)
+                CurrentClass = IndexTemp(1);
+            end
+            outputSingleScan(DO, [0 0 0 0 0 0 0 0]);
+            Screen(window,'FillRect',black)  % Clear screen
+            %  Intertrial inverval
+            while ((GetSecs - breaktime) < intertrial_interval) && (BreakState ~=1)
                 DisplayEye(Display, hAxes, hLine);
-                [FixState] = CheckFixation(eye_target_queue{frame_idx, 1}, eye_target_queue{frame_idx, 2}, Display);
+                BreakState = CheckBreakState;
             end
-            if (FixState == 0)
-                break
+            %   Do not log eye data until end of trial
+            all_eye     = trial_eye_data;
+            all_eyetime = trial_eye_timestamp;
+            AllData.trials(save_counter).eye_time = all_eyetime;
+            AllData.trials(save_counter).eye_loc = all_eye;
+            stop(ai);
+            if (BreakState == 1)
+                break;
             end
-            % Successful maintanance of fixation means +1 Statecode
-            Statecode = Statecode + 1;
+            trial_counter = trial_counter + 1;
+            save_counter = save_counter + 1;
         end
-        %% Trial end
-        finish_Statecode = sum(aqusition_time_queue > 0) + numel(aqusition_time_queue) + 1;
-        if Statecode == finish_Statecode
-            Result = 1;
-            %     wavesoundplay('correct.wav',0.6);
-        elseif Statecode == finish_Statecode - 2 % Not moving to target location
-            Result = 0;
-            %     wavesoundplay('wrong.wav',0.6);
-        else %  Aborted trial before target epoch
-            Result = 0;
-            %         wavesoundplay('abort.wav',0.8);
-        end
-        % End-of-trial screen
-        breaktime = GetSecs;
-        outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
-        Screen('CopyWindow',r,window);
-        Screen(window,'Flip');
-        outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
-        UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'off')
-        AllData.trials(save_counter).EndofTrialtime = GetSecs;  %  end of trial time, same as fixoff time in passive task
-        AllData.trials(save_counter).timestamp_queue = time_stamp_queue;
-        AllData.trials(save_counter).Statecode = Statecode;
-        if Result == 1  %  correct trial, give reward
-            AllData.trials(save_counter).Reward = 'Yes';
-            correct_counter = correct_counter + 1;
-            dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 1, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
-            for burst = 1:num_burst
-                outputSingleScan(DO, [1 0 0 0 0 0 1 0]);
-                WaitSecs(0.65);
-                outputSingleScan(DO, [0 0 0 0 0 0 1 0]);
-                WaitSecs(0.10);
-            end
-            intertrial_interval = intertrial_interval_correct - gate_off_time;
-            repeat_counter = repeat_counter + 1;
-            IndexHist(CurrentClass) = CurrentClass; % store correct trial class indices
-        else
-            AllData.trials(save_counter).Reward = 'No';
-            dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 0, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
-            intertrial_interval = intertrial_interval_error - gate_off_time;
-        end
-        %   Logging NIDAQ listener output
-        all_eye     = trial_eye_data;
-        all_eyetime = trial_eye_timestamp;
-        %   Stops and flushes the NIDAQ listener until the next trial
-        %   all_eyetime now starts at 0 each trial
-        eyeX = (((all_eye(:,1)-Display.Xscalecenter).*Display.Xscale));
-        eyeY = (((all_eye(:,2)-Display.Yscalecenter).*Display.Yscale));
-        set(hLine(4), 'XData',all_eyetime,...
-            'YData', eyeX);
-        set(hLine(5), 'XData',all_eyetime,...
-            'YData', eyeY);
-        set(hAxes(2),'YLim', [-15 15],'XLim', [0 sum(datain(1:4)) + fix_aquisition + target_aquisition]);
-        set(hAxes(3),'YLim', [-15 15],'XLim', [0 sum(datain(1:4)) + fix_aquisition + target_aquisition]);
-        drawnow
-        %   Remaining trials shuffling
-        IndexTotl = randperm(total_trials);
-        IndexTemp = IndexTotl(~ismember(IndexTotl,IndexHist));  % delete previous correct trial class index
-        if ~isempty(IndexTemp)
-            CurrentClass = real_trials(IndexTemp(1));
-        end
-        outputSingleScan(DO, [0 0 0 0 0 0 0 0]);
-        Screen(window,'FillRect',black)  % Clear screen
-        %  Intertrial inverval
-        while ((GetSecs - breaktime) < intertrial_interval) && (BreakState ~=1)
-            DisplayEye(Display, hAxes, hLine);
-            BreakState = CheckBreakState;
-        end
-        %   Do not log eye data until end of trial
-        all_eye     = trial_eye_data;
-        all_eyetime = trial_eye_timestamp;
-        AllData.trials(save_counter).eye_time = all_eyetime;
-        AllData.trials(save_counter).eye_loc = all_eye;
-        stop(ai);
-        if (BreakState == 1)
-            break;
-        end
-        trialcounter = trialcounter + 1;
-        save_counter = save_counter + 1;
+        block_counter = block_counter + 1;
     end
-    block_counter = block_counter + 1;
 end
 % catch
 %     lasterror
 % end
-save(['C:\Users\CCLAB\Documents\MATLAB\Behavioral_Data\' save_name],'AllData');
+save(['C:\Users\CCLAB\Documents\MATLAB\Beh\' save_name],'AllData');
 % clear
 %CleanUp
 
@@ -409,7 +420,7 @@ if isempty(trial_eye_data)
     eye =[0, 0];
 else
     eye = trial_eye_data(end, :);
-    
+
 end
 eyeX = (((eye(1,1)-Display.Xscalecenter)*Display.Xscale));
 eyeY = (((eye(1,2)-Display.Yscalecenter)*Display.Yscale));
@@ -431,7 +442,7 @@ if isempty(trial_eye_data)
     eye =[0, 0];
 else
     eye = trial_eye_data(end, :);
-    
+
 end
 eyeX = (((eye(1,1)-Display.Xscalecenter)*Display.Xscale));
 eyeY = (((eye(1,2)-Display.Yscalecenter)*Display.Yscale));

@@ -22,15 +22,15 @@ for i = 1:n_class
 end
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-datain(1:4) = [1 0.5 3.0 .2];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
+datain(1:4) = [1 0.5 1.5 .2];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
 datain(5) = 3;                 %  Trial type
 datain(6) = 50;                %  Number of blocks
 datain(7) = 0;                %  Stimulus eccentricity
-datain(8) = 3;                 %  Radius in degree of fixation window
-datain(9) = 6;                 %  Radius in degree of target window
+datain(8) = 30;                 %  Radius in degree of fixation window
+datain(9) = 60;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 5;
+numBurst = 1;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,7 +155,7 @@ AllData.starttime = GetSecs;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 WaitSecs(2);
 % try
-    while (BreakState ~= 1) & (blockcounter <= totalblocks)
+    while (BreakState ~= 1) && (blockcounter <= totalblocks)
         trialcounter = 1;
         repeatcounter = 1;
         outputcounter = outputcounter + 1;
@@ -165,7 +165,7 @@ WaitSecs(2);
         IndexTotl = randperm(length(GeneralVars.ClassStructure));
         CurrentClass = IndexTotl(1);
         
-        while (repeatcounter <= totaltrials) & (BreakState ~=1)
+        while (repeatcounter <= totaltrials) && (BreakState ~=1)
             %   New instance of eye data
             outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
             AllData.trials(save_counter).time = GetSecs;
@@ -228,7 +228,7 @@ WaitSecs(2);
                 breaktime = GetSecs;
                 if aqusition_time_queue(frame_idx) > 0
                     FixState = 0;
-                    while (FixState <= 0) & ((GetSecs - breaktime) < aqusition_time_queue(frame_idx))
+                    while (FixState <= 0) && ((GetSecs - breaktime) < aqusition_time_queue(frame_idx))
                         DisplayEye(Display, hAxes, hLine);
                     [FixState] = CheckFixation(eye_target_queue{frame_idx, 1}, eye_target_queue{frame_idx, 2}, Display);
                     end
@@ -238,12 +238,12 @@ WaitSecs(2);
                     %   Aquiring new fixation means +1 Statecode
                     Statecode = Statecode + 1;
                     %   Fixation in timestamps
-                    timestamp_queue(Statecode) = GetSecs
+                    timestamp_queue(Statecode) = GetSecs;
                 end
                 %
                 %   Step3: Maintain fixation
                 breaktime = GetSecs;
-                while (FixState == 1) & ((GetSecs - breaktime) < frame_time_queue(frame_idx))
+                while (FixState == 1) && ((GetSecs - breaktime) < frame_time_queue(frame_idx))
                     DisplayEye(Display, hAxes, hLine);
                     [FixState] = CheckFixation(eye_target_queue{frame_idx, 1}, eye_target_queue{frame_idx, 2}, Display);
                 end
@@ -291,7 +291,7 @@ WaitSecs(2);
                 IndexHist(CurrentClass) = CurrentClass;
             else
                 AllData.trials(save_counter).Reward = 'No';
-                dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass, correctcounter, 0,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode};
+                dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass, correctcounter, 0,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode}
                 intertrial_interval = intertrial_interval_error-gate_off_time;
             end
             %   Logging NIDAQ listener output
@@ -479,7 +479,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [BreakState] = CheckBreakState
 
-[MouseX, ~, Breakbutton] = GetMouse;
+[~, ~, Breakbutton] = GetMouse;
  
 %  Check for mouse click
 if any(Breakbutton)
@@ -490,11 +490,11 @@ if any(Breakbutton)
         Breakbuttons = GetClicks;
         if Breakbuttons == 1
             BreakState = 0;
-            Breakbuttons
+            Breakbuttons;
             return
         elseif Breakbuttons > 1
             BreakState = 1;
-            Breakbuttons
+            Breakbuttons;
             return
         end
     end

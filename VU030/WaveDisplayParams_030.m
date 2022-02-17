@@ -1,14 +1,14 @@
 function [vstruct, Display] = WaveDisplayParams_030(vstruct, datain)
-% version for shape task
+% version for spatial task - JZ
 pix=vstruct.siz./vstruct.res; %calculates the size of a pixel in cm
-vstruct.degpix=atan(pix./vstruct.dis).*(180/pi);
-vstruct.pixdeg=1./vstruct.degpix;
+vstruct.degpix = atan(pix./vstruct.dis).*(180/pi);
+vstruct.pixdeg = 1./vstruct.degpix;
 %vstruct.pixvolt = vstruct.pixdeg*vstruct.voltage;
 
-stim_degsize=1;
+stim_degsize = 1;
 Display.Stimsize = [round(stim_degsize*vstruct.pixdeg) round(stim_degsize*vstruct.pixdeg)];   %stim size in pixel
 Display.FixSize = [3 3]; %fixation point size in pixels
-Display.Lum  = datain(10:11)./100; 
+Display.Lum  = datain(10:numel(datain))./100;   % Can be more than 2 values - JZ 20220217
 Display.FixationWindow = datain(8);
 Display.TargetWindow = datain(9);
 % 

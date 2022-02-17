@@ -1,5 +1,6 @@
-% TrainBiasedODR_030
-% based on TrainODR_023. JZ 20220117
+% RecordBiasedODR_030
+% Based on TrainBiasedODR_023.
+% Added zeroMQwrapper for communicating with OpenEphys computer. JZ 20220217
 clear
 close all
 % warning off all
