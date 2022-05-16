@@ -104,7 +104,7 @@ end
       keyCode=[];
       breaktime = GetSecs;
       centeredRect=CenterRectOnPointd(baseRect,xCenter,yCenter);
-%       wavesoundplay('fix_on.wav',0.4);
+      wavesoundplay('fix_on.wav',0.4);
      Screen('FillRect',window,[0,255,0],centeredRect);
      Screen('Flip',window);
   end

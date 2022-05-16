@@ -1,5 +1,6 @@
 %5 points for ISCAN calibration 6/10/20 Wenhao
 % Check display params before use
+Screen('Preference', 'VisualDebugLevel', 3);
 sca; % Execute Screen(‘CloseAll’) closs all psychtoolbox windows
 close all;  %close all figure windows
 clearvars;  % delete all variables
@@ -30,7 +31,7 @@ ifi=Screen('GetFlipInterval',window);
 [screenXpixels,screenYpixels]=Screen('WindowSize',window);
 
 exit_cali=false;
-numSecs=10;
+numSecs=2;
 %numFrames=round(numSecs/ifi);
 baseRect=[0,0,15,15];
 deg=10; 
@@ -103,7 +104,7 @@ end
       keyCode=[];
       breaktime = GetSecs;
       centeredRect=CenterRectOnPointd(baseRect,xCenter,yCenter);
-%       wavesoundplay('fix_on.wav',0.4);
+      wavesoundplay('fix_on.wav',0.4);
      Screen('FillRect',window,[0,255,0],centeredRect);
      Screen('Flip',window);
   end

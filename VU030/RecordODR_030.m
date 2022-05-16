@@ -156,7 +156,7 @@ AllData.starttime = GetSecs;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 outputSingleScan(DO,[0,1,0,0,0,0,0,0]); %   DO1 on NIDAQ remains high for the whole sessions -ZW
 % zeroMQwrapper('Send',tcp_handle, save_name);
-% send_network_event(save_name);
+send_network_event(save_name);
 WaitSecs(2);
 % try
     while (BreakState ~= 1) && (blockcounter <= totalblocks)
@@ -350,7 +350,7 @@ save(['C:\Users\cclab\Documents\MATLAB\beh\' save_name], 'AllData');
 %CleanUp
 % zeroMQwrapper('Send',tcp_handle , [save_name, '_end_of_session']);
 % zeroMQwrapper('CloseThread',tcp_handle);
-% send_network_event([save_name, '_end_of_session']);
+send_network_event([save_name, '_end_of_session']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [Figdata, hFig, hAxes, hLine] = InitEyeDisplay
 btnColor=get(0,'DefaultUIControlBackgroundColor');

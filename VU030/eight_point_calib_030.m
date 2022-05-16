@@ -26,7 +26,7 @@ GeneralVars.ClassStructure(n_class + 1).Notes = 'center';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datain(1:4) = [1 0 0 0];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
 datain(5) = nan;                 %  Trial type
-datain(6) = 3;                %  Number of blocks
+datain(6) = 5;                %  Number of blocks
 datain(7) = nan;                %  Stimulus eccentricity
 datain(8) = 7;                 %  Radius in degree of fixation window
 datain(9) = nan;                 %  Radius in degree of target window
@@ -156,7 +156,7 @@ AllData.starttime = GetSecs;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Main Code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-WaitSecs(2);
+WaitSecs(1);
 % try
     while (BreakState ~= 1) & (blockcounter <= totalblocks)
         trialcounter = 1;
@@ -285,7 +285,7 @@ WaitSecs(2);
                     outputSingleScan(DO, [1 0 0 0 0 0 1 0]);
                     WaitSecs(0.65);
                     outputSingleScan(DO, [0 0 0 0 0 0 1 0]);
-                    WaitSecs(0.10);
+                    WaitSecs(0.50);
                 end
                 intertrial_interval = intertrial_interval_correct-gate_off_time;
                 repeatcounter = repeatcounter + 1;

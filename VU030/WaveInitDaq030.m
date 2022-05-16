@@ -15,9 +15,17 @@ DO=daq.createSession('ni');
 Dch=addDigitalChannel(DO,'Dev1','Port0/Line0:7','OutputOnly');
 
 %%
-addpath('OpenEphys');
-url = 'tcp://10.32.133.176:5556'; % or, e.g., //'tcp://10.71.212.19:5556 if GUI runs on another machine...
-tcp_handle = zeroMQwrapper('StartConnectThread',url);
+% addpath(genpath('C:\Users\cclab\Documents\MATLAB\Scripts\plugin-GUI-master\Resources\Matlab'));
+% url = 'tcp://10.32.133.176:5556'; % or, e.g., //'tcp://10.71.212.19:5556 if GUI runs on another machine...
+% tcp_handle = zeroMQwrapper('StartConnectThread',url);
+%%
+pe = pyenv;
+if pe.Status == 'Loaded'
+    disp('Python is loaded');
+else
+    pyenv('Version', ' C:\Apps\Conda\envs\zmq\python.exe');
+    disp('Python is loaded');
+end
 %%
 
 % function saveeyeData(src,event)

@@ -7,6 +7,6 @@ WaitSecs(1);
             outputSingleScan(DO,[1,0,0,0,0,0,0,0]);
             WaitSecs(0.65);
             outputSingleScan(DO,[0,0,0,0,0,0,0,0]);
-            WaitSecs(1.6);
+            WaitSecs(3.6);
        end
 end

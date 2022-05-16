@@ -27,10 +27,10 @@ datain(5) = 3;                 %  Trial type
 datain(6) = 50;                %  Number of blocks
 datain(7) = 0;                %  Stimulus eccentricity
 datain(8) = 3;                 %  Radius in degree of fixation window
-datain(9) = 7;                 %  Radius in degree of target window
+datain(9) = 5;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 1;
+numBurst = 2;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -238,7 +238,7 @@ WaitSecs(2);
                     %   Aquiring new fixation means +1 Statecode
                     Statecode = Statecode + 1;
                     %   Fixation in timestamps
-                    timestamp_queue(Statecode) = GetSecs
+                    timestamp_queue(Statecode) = GetSecs;
                 end
                 %
                 %   Step3: Maintain fixation
@@ -291,7 +291,7 @@ WaitSecs(2);
                 IndexHist(CurrentClass) = CurrentClass;
             else
                 AllData.trials(save_counter).Reward = 'No';
-                dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass, correctcounter, 0,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode};
+                dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass, correctcounter, 0,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode}
                 intertrial_interval = intertrial_interval_error-gate_off_time;
             end
             %   Logging NIDAQ listener output

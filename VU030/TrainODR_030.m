@@ -25,12 +25,12 @@ end
 datain(1:4) = [1 0.5 1.5 .2];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
 datain(5) = 3;                 %  Trial type
 datain(6) = 50;                %  Number of blocks
-datain(7) = 0;                %  Stimulus eccentricity
-datain(8) = 30;                 %  Radius in degree of fixation window
-datain(9) = 60;                 %  Radius in degree of target window
+datain(7) = 10;                %  Stimulus eccentricity
+datain(8) = 3;                 %  Radius in degree of fixation window
+datain(9) = 6;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 1;
+numBurst = 4;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

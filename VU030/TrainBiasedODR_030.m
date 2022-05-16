@@ -14,8 +14,8 @@ Version = 'TrainBiasedODR_030_v0.1_01_17_22' ; % after code changes, change vers
 
 %% Parameters
 
-loc_mean = 45;                 % In degree, change before run
-datain(1:4) = [1, 0.5, 3.0, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
+loc_mean = 66;                 % In degree, change before run
+datain(1:4) = [1, 0.5, 3, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
 datain(7) = 10;                % Stimulus eccentricity
