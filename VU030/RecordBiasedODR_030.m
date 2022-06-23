@@ -1,6 +1,7 @@
 % RecordBiasedODR_030
-% Based on TrainBiasedODR_023.
-% Added zeroMQwrapper for communicating with OpenEphys computer. JZ 20220217
+% Based on TrainBiasedODR_030.
+% Added network event for communicating with OpenEphys computer. 
+% JZ 20220531
 clear
 close all
 % warning off all
@@ -11,20 +12,20 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'RecordBiasedODR_030_v0.1_02_09_22' ; % after code changes, change version
+Version = 'RecordBiasedODR_030_v0.11_05_31_22' ; % after code changes, change version
 
 %% Parameters
 
-loc_mean = 66;                 % In degree, change before run
+loc_mean = 12;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3.0, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
 datain(7) = 10;                % Stimulus eccentricity
-datain(8) = 30;                 % Radius in degree of fixation window
-datain(9) = 60;                 % Radius in degree of target window
-datain(10) = 0;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
+datain(8) = 3;                 % Radius in degree of fixation window
+datain(9) = 6;                 % Radius in degree of target window
+datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 2;
+num_burst = 4;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
@@ -139,7 +140,9 @@ AllData.starttime = GetSecs;
 %   channel 5 on and off every stimuli appearance
 
 %% Main Code
-zeroMQwrapper('Send',tcp_handle, save_name);
+outputSingleScan(DO,[0,1,0,0,0,0,0,0]); %   DO1 on NIDAQ remains ON for the whole sessions
+% zeroMQwrapper('Send',tcp_handle, save_name);
+send_network_event(save_name);
 WaitSecs(2);
 while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
     trialcounter = 1;
@@ -153,7 +156,7 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
     
     while (repeat_counter <= total_trials) && (BreakState ~= 1) % each trial
         %   New instance of eye data
-        outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
+        outputSingleScan(DO,[0,1,0,0,0,0,1,0]);
         AllData.trials(save_counter).time = GetSecs;
         AllData.trials(save_counter).Class = CurrentClass;
         AllData.outputcounter = output_counter;
@@ -198,12 +201,12 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         %%  Core loop
         for frame_idx = 1:numel(window_queue)
             %   Step 1: Display current window
-            outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
+            outputSingleScan(DO,[0,1,0,0,1,0,1,0]);
             Screen('CopyWindow',window_queue{frame_idx},window);
             Screen(window,'Flip');
             %   Screen updating timestamps ('CueOn', 'TargetOn' etc.)
             time_stamp_queue(Statecode) = GetSecs;
-            outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
+            outputSingleScan(DO,[0,1,0,0,0,0,1,0]);
             %                 wavesoundplay(audio_queue{frame_idx, 1}, audio_queue{frame_idx, 1});
             UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'on')
             %   Step 2: Aquire fixation (if allowed)
@@ -248,22 +251,23 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         end
         % End-of-trial screen
         breaktime = GetSecs;
-        outputSingleScan(DO,[0,0,0,0,1,0,1,0]);
+        outputSingleScan(DO,[0,1,0,0,1,0,1,0]);
         Screen('CopyWindow',r,window);
         Screen(window,'Flip');
-        outputSingleScan(DO,[0,0,0,0,0,0,1,0]);
+        outputSingleScan(DO,[0,1,0,0,0,0,1,0]);
         UpdateEyeDisplay(eye_display_queue{frame_idx, 1}, eye_display_queue{frame_idx, 2}, eye_display_queue{frame_idx, 1},vstruct, hLine,'off')
         AllData.trials(save_counter).EndofTrialtime = GetSecs;  %  end of trial time, same as fixoff time in passive task
         AllData.trials(save_counter).timestamp_queue = time_stamp_queue;
         AllData.trials(save_counter).Statecode = Statecode;
+        outputSingleScan(DO, [0 1 0 0 0 0 0 0]);
         if Result == 1  %  correct trial, give reward
             AllData.trials(save_counter).Reward = 'Yes';
             correct_counter = correct_counter + 1;
             dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 1, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
             for burst = 1:num_burst
-                outputSingleScan(DO, [1 0 0 0 0 0 1 0]);
+                outputSingleScan(DO, [1 1 0 0 0 0 0 0]);
                 WaitSecs(0.65);
-                outputSingleScan(DO, [0 0 0 0 0 0 1 0]);
+                outputSingleScan(DO, [0 1 0 0 0 0 0 0]);
                 WaitSecs(0.10);
             end
             intertrial_interval = intertrial_interval_correct - gate_off_time;
@@ -294,7 +298,6 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         if ~isempty(IndexTemp)
             CurrentClass = real_trials(IndexTemp(1));
         end
-        outputSingleScan(DO, [0 0 0 0 0 0 0 0]);
         Screen(window,'FillRect',black)  % Clear screen
         %  Intertrial inverval
         while ((GetSecs - breaktime) < intertrial_interval) && (BreakState ~=1)
@@ -318,11 +321,13 @@ end
 % catch
 %     lasterror
 % end
+outputSingleScan(DO, [0 0 0 0 0 0 0 0]);
 save(['C:\Users\cclab\Documents\MATLAB\beh\' save_name],'AllData');
 % clear
 %CleanUp
-zeroMQwrapper('Send',tcp_handle , [save_name, '_end_of_session']);
-zeroMQwrapper('CloseThread',tcp_handle);
+% zeroMQwrapper('Send',tcp_handle , [save_name, '_end_of_session']);
+% zeroMQwrapper('CloseThread',tcp_handle);
+send_network_event([save_name, '_end_of_session']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [Figdata, hFig, hAxes, hLine] = InitEyeDisplay
 btnColor=get(0,'DefaultUIControlBackgroundColor');

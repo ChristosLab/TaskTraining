@@ -28,11 +28,11 @@ datain(1:4) = [1 0 0 0];    %  Default waiting times for each frame [fixation. c
 datain(5) = nan;                 %  Trial type
 datain(6) = 5;                %  Number of blocks
 datain(7) = nan;                %  Stimulus eccentricity
-datain(8) = 6;                 %  Radius in degree of fixation window
+datain(8) = 4;                 %  Radius in degree of fixation window
 datain(9) = nan;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = nan;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 1;
+numBurst = 2;
 
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

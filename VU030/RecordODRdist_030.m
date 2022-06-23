@@ -15,10 +15,10 @@ Version = 'RecordODRDist_030_v0.11' ; % after code changes, change version
 %   MATLAB 2021b and later.
 %% Parameters
 
-cue_loc = 1;                 % Change before run. 1 for card, 2 for diag, 3 for both
+cue_loc = 2;                 % Change before run. 1 for card, 2 for diag, 3 for both
 datain(1:4) = [1, 0.5, 1.25, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
-datain(6) = 15;                % Number of blocks
+datain(6) = 12;                % Number of blocks
 datain(7) = 10;                % Stimulus eccentricity
 datain(8) = 3;                 % Radius in degree of fixation window
 datain(9) = 6;                 % Radius in degree of target window

@@ -10,11 +10,11 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'TrainBiasedODR_030_v0.1_01_17_22' ; % after code changes, change version
+Version = 'TrainBiasedODR_030_v0.2_06_22_22' ; % after code changes, change version
 
 %% Parameters
 
-loc_mean = 66;                 % In degree, change before run
+loc_mean = 26;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
@@ -149,7 +149,8 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         'Success' '%' 'Notes','State'}
     IndexHist = zeros(1, total_trials); % init the index shuffle
     IndexTotl = randperm(total_trials); % shuffle indeces of real_trials
-    CurrentClass = real_trials(IndexTotl(1)); % pick the respective Class
+    CurrentIndex = IndexTotl(1);
+    CurrentClass = real_trials(CurrentIndex); % pick the respective Class
     
     while (repeat_counter <= total_trials) && (BreakState ~= 1) % each trial
         %   New instance of eye data
@@ -268,7 +269,7 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
             end
             intertrial_interval = intertrial_interval_correct - gate_off_time;
             repeat_counter = repeat_counter + 1;
-            IndexHist(CurrentClass) = CurrentClass; % store correct trial class indices
+            IndexHist(CurrentIndex) = CurrentIndex; % store correct trial AllList indices
         else
             AllData.trials(save_counter).Reward = 'No';
             dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 0, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
@@ -292,7 +293,8 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         IndexTotl = randperm(total_trials);
         IndexTemp = IndexTotl(~ismember(IndexTotl,IndexHist));  % delete previous correct trial class index
         if ~isempty(IndexTemp)
-            CurrentClass = real_trials(IndexTemp(1));
+            CurrentIndex = IndexTemp(1);
+            CurrentClass = real_trials(CurrentIndex);
         end
         outputSingleScan(DO, [0 0 0 0 0 0 0 0]);
         Screen(window,'FillRect',black)  % Clear screen
