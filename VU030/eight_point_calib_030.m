@@ -8,7 +8,7 @@ daqreset;
 Screen('Preference', 'VisualDebugLevel', 3);
 % Screen('OpenWindow', 2, BlackIndex(0));
 %%  Version info
-version = 'eight_point_calib_030_v0.10_01_13_22' ; % after code changes, change version
+version = 'eight_point_calib_030_v0.2_06_29_22' ; % after code changes, change version
 %%  Define feature classes
 n_class = 8;
 stim_radius = 10; % degrees
@@ -28,11 +28,11 @@ datain(1:4) = [1 0 0 0];    %  Default waiting times for each frame [fixation. c
 datain(5) = nan;                 %  Trial type
 datain(6) = 5;                %  Number of blocks
 datain(7) = nan;                %  Stimulus eccentricity
-datain(8) = 7;                 %  Radius in degree of fixation window
+datain(8) = 6;                 %  Radius in degree of fixation window
 datain(9) = nan;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = nan;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 2;
+numBurst = 1;
 
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -148,6 +148,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %channel 8 on for duration of whole trial

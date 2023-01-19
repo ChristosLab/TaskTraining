@@ -10,20 +10,21 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'TrainBiasedODR_030_v0.2_06_22_22' ; % after code changes, change version
-
+Version = 'TrainBiasedODR_030_v0.21_06_29_22' ; % after code changes, change version
+%   Added AllData.parameter.script variable to save the current script as
+%   characters in the output data file                     2022_06_29 -ZW
 %% Parameters
 
-loc_mean = 26;                 % In degree, change before run
+loc_mean = 15;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
-datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
+datain(6) = 2;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
 datain(7) = 10;                % Stimulus eccentricity
 datain(8) = 3;                 % Radius in degree of fixation window
 datain(9) = 6;                 % Radius in degree of target window
 datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 4;
+num_burst = 3;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
@@ -132,6 +133,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %   channel 8 on for duration of whole trial

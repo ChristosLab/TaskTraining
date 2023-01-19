@@ -32,7 +32,7 @@ datain(8) = 4;                 %  Radius in degree of fixation window
 datain(9) = nan;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = nan;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 2;
+numBurst = 1;
 
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

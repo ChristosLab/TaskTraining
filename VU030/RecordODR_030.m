@@ -11,9 +11,9 @@ daqreset;
 Screen('Preference', 'VisualDebugLevel', 3);
 % Screen('OpenWindow', 2, BlackIndex(0));
 %%  Version info
-version = 'RecordODR_030_v0.11' ; % after code changes, change version
-%   Added send_netork_event.m that sends TCP events through pyzmq. Requires
-%   MATLAB 2021b and later.
+version = 'RecordODR_030_v0.12' ; % after code changes, change version
+%   Added AllData.parameter.script variable to save the current script as
+%   characters in the output data file                     2022_06_29 -ZW
 %%  Define feature classes
 n_class = 8;
 stim_radius = 10; % degrees
@@ -29,13 +29,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datain(1:4) = [1 0.5 3.0 .2];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
 datain(5) = 3;                 %  Trial type
-datain(6) = 40;                %  Number of blocks
-datain(7) = 0;                %  Stimulus eccentricity
+datain(6) = 8;                %  Number of blocks
+datain(7) = 10;                %  Stimulus eccentricity
 datain(8) = 3;                 %  Radius in degree of fixation window
 datain(9) = 6;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-numBurst = 4;
+numBurst = 2;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,6 +149,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %channel 8 on for duration of whole trial

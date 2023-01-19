@@ -10,22 +10,22 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'RecordODRDist_030_v0.11' ; % after code changes, change version
-%   Added send_netork_event.m that sends TCP events through pyzmq. Requires
-%   MATLAB 2021b and later.
+Version = 'RecordODRDist_030_v0.13_2022_08_02' ; % after code changes, change version
+%   Corrected vstruct.dis from 68 to 69 to be consistent with the other
+%   tasks                     2022_08_02 -ZW
 %% Parameters
 
 cue_loc = 2;                 % Change before run. 1 for card, 2 for diag, 3 for both
 datain(1:4) = [1, 0.5, 1.25, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
-datain(6) = 12;                % Number of blocks
+datain(6) = 15;                % Number of blocks
 datain(7) = 10;                % Stimulus eccentricity
 datain(8) = 3;                 % Radius in degree of fixation window
 datain(9) = 6;                 % Radius in degree of target window
 datain(10) = 100;              % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 100;              % distractor luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(12) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 4;
+num_burst = 3;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
@@ -42,7 +42,7 @@ stim_radius = 10; %datain(7); % Stimulus eccentricity
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 vstruct.res = [1920 1080];    % screen resolution
 vstruct.siz = [94 53];        % screen size in cm
-vstruct.dis = 68;            % viewing distance in cm
+vstruct.dis = 69;            % viewing distance in cm
 vstruct.radius = stim_radius;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Output settings
@@ -128,6 +128,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %   channel 8 on for duration of whole trial

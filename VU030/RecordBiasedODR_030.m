@@ -12,11 +12,13 @@ Screen('Preference', 'VisualDebugLevel', 3);
 
 %%  Version info
 
-Version = 'RecordBiasedODR_030_v0.11_05_31_22' ; % after code changes, change version
+Version = 'RecordBiasedODR_030_v0.21_20220629' ; % after code changes, change version
+%   Added AllData.parameter.script variable to save the current script as
+%   characters in the output data file                     2022_06_29 -ZW
 
 %% Parameters
 
-loc_mean = 12;                 % In degree, change before run
+loc_mean = 9;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3.0, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 1;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
@@ -25,7 +27,7 @@ datain(8) = 3;                 % Radius in degree of fixation window
 datain(9) = 6;                 % Radius in degree of target window
 datain(10) = 100;               % Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                % Helper luminance as percentage (1 - 100) of color depth (typically 0 - 255)
-num_burst = 4;
+num_burst = 2;
 fix_aquisition = 1;
 target_aquisition = 0.6;
 intertrial_interval_correct = 2;
@@ -133,6 +135,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %   channel 8 on for duration of whole trial
@@ -152,7 +155,8 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         'Success' '%' 'Notes','State'}
     IndexHist = zeros(1, total_trials); % init the index shuffle
     IndexTotl = randperm(total_trials); % shuffle indeces of real_trials
-    CurrentClass = real_trials(IndexTotl(1)); % pick the respective Class
+    CurrentIndex = IndexTotl(1);
+    CurrentClass = real_trials(CurrentIndex); % pick the respective Class
     
     while (repeat_counter <= total_trials) && (BreakState ~= 1) % each trial
         %   New instance of eye data
@@ -272,7 +276,7 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
             end
             intertrial_interval = intertrial_interval_correct - gate_off_time;
             repeat_counter = repeat_counter + 1;
-            IndexHist(CurrentClass) = CurrentClass; % store correct trial class indices
+            IndexHist(CurrentIndex) = CurrentIndex; % store correct trial class indices
         else
             AllData.trials(save_counter).Reward = 'No';
             dataout(output_counter,1:7) = {output_counter-block_counter, CurrentClass, correct_counter, 0, ReactionTime, ClassStructure(CurrentClass).Notes, Statecode}
@@ -296,7 +300,8 @@ while (BreakState ~= 1) && (block_counter <= total_blocks) % each block
         IndexTotl = randperm(total_trials);
         IndexTemp = IndexTotl(~ismember(IndexTotl,IndexHist));  % delete previous correct trial class index
         if ~isempty(IndexTemp)
-            CurrentClass = real_trials(IndexTemp(1));
+            CurrentIndex = IndexTemp(1);
+            CurrentClass = real_trials(CurrentIndex);
         end
         Screen(window,'FillRect',black)  % Clear screen
         %  Intertrial inverval

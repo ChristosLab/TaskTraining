@@ -8,7 +8,9 @@ daqreset;
 Screen('Preference', 'VisualDebugLevel', 3);
 % Screen('OpenWindow', 2, BlackIndex(0));
 %%  Version info
-version = 'TrainODR_030_v0.1' ; % after code changes, change version
+version = 'TrainODR_030_v0.11_2022_06_29' ; % after code changes, change version
+%   Added AllData.parameter.script variable to save the current script as
+%   characters in the output data file                     2022_06_29 -ZW
 %%  Define feature classes
 n_class = 8;
 stim_radius = 10; % degrees
@@ -24,7 +26,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 datain(1:4) = [1 0.5 3.0 .2];    %  Default waiting times for each frame [fixation. cue delay1 sample delay2]
 datain(5) = 3;                 %  Trial type
-datain(6) = 50;                %  Number of blocks
+datain(6) = 80;                %  Number of blocks
 datain(7) = 10;                %  Stimulus eccentricity
 datain(8) = 3;                 %  Radius in degree of fixation window
 datain(9) = 6;                 %  Radius in degree of target window
@@ -40,8 +42,8 @@ vstruct.res = [1920 1080];    % screen resolution
 vstruct.siz = [94 53];        % screen size in cm
 vstruct.dis = 69;             % viewing distance in cm
 vstruct.radius = datain(7);   % Stimulus excentricity
-intertrial_interval_correct = 3;
-intertrial_interval_error   = 3;
+intertrial_interval_correct = 2;
+intertrial_interval_error   = 2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %             Name Output File
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -145,6 +147,7 @@ AllData.parameters.ITI_Correct = intertrial_interval_correct;
 AllData.parameters.ITI_Error   = intertrial_interval_error;
 AllData.parameters.FixAquisition = fix_aquisition;
 AllData.parameters.TargetAquisition = target_aquisition;
+AllData.parameters.script = char(fread(fopen([mfilename, '.m'])))';
 AllData.synctime = clock;
 AllData.starttime = GetSecs;
 %channel 8 on for duration of whole trial

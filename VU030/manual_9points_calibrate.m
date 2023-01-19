@@ -16,7 +16,6 @@ rightupkey=KbName('9');
 rightdownkey=KbName('3');
 leftdownkey=KbName('1');
 
-
 escapekey=KbName('return');
 rewardkey=KbName('0');
 animal_shift=[0,0];
@@ -35,7 +34,7 @@ numSecs=2;
 %numFrames=round(numSecs/ifi);
 baseRect=[0,0,15,15];
 deg=10; 
-distance=68; %in cm animal to screen
+distance=69; %in cm animal to screen
 screen_width=94;
 screen_height=53;
 pix=[screen_width screen_height]./[screenXpixels,screenYpixels]; %calculates the size of a pixel in cm
