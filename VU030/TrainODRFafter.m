@@ -1,6 +1,6 @@
-% TrainODRF_030
-% Based on TrainODR_030.
-% Same as ODR task but with a retro cue after saccade as feedback
+% TrainODRFafter_030
+% Based on TrainODRF_030.
+% Same as ODRF but feedack after reward
 % JZ 20230124
 clear
 close all
@@ -11,8 +11,8 @@ daqreset;
 Screen('Preference', 'VisualDebugLevel', 3);
 % Screen('OpenWindow', 2, BlackIndex(0));
 %%  Version info
-version = 'TrainODRF_030_v0.11_2023_01_24' ; % after code changes, change version
-% only show feedback in complated trials
+version = 'TrainODRF_030_v0.10_2023_01_23' ; % after code changes, change version
+%   adapted from TrainODR_030.m
 %%  Define feature classes
 n_class = 8;
 stim_radius = 10; % degrees
@@ -31,11 +31,11 @@ datain(1:4) = [1 0.5 3 0.2];    %  Default waiting times for each frame [fixatio
 datain(5) = 3;                 %  Trial type
 datain(6) = 80;                %  Number of blocks
 datain(7) = 10;                %  Stimulus eccentricity
-datain(8) = 30;                 %  Radius in degree of fixation window
-datain(9) = 60;                 %  Radius in degree of target window
+datain(8) = 3;                 %  Radius in degree of fixation window
+datain(9) = 6;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth
-datain(12) = 50;                %  Feedback luminance as percentage (1 - 100) of color depth
+datain(12) = 20;                %  Feedback luminance as percentage (1 - 100) of color depth
 numBurst = 1;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
@@ -264,12 +264,12 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
             % Successful maintanance of fixation means +1 Statecode
             Statecode = Statecode + 1;
         end
-        %% Trial end: feedback and reward
+        %% Trial end:  reward and feedback
         finishStatecode = sum(aqusition_time_queue > 0) + numel(aqusition_time_queue);
         if Statecode == finishStatecode
             Result = 1;
             %     wavesoundplay('correct.wav',0.6);
-        elseif Statecode >= finishStatecode - 2 % not correct saccade
+        elseif Statecode >= finishStatecode - 2 % Not correct saccade
             Result = 0.5;
             %     wavesoundplay('wrong.wav',0.6);
         else %  Aborted trial before target epoch
@@ -291,24 +291,24 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
             AllData.trials(save_counter).Reward = 'Yes';
             correctcounter = correctcounter + 1;
             dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass,correctcounter, 1,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode}
-            Screen('CopyWindow',window_queue{end},window);
-            Screen(window,'Flip');
-            WaitSecs(frame_time_queue(end));
-            Screen('CopyWindow',r,window);
-            Screen(window,'Flip');  %feedback
             for burst=1:numBurst
                 outputSingleScan(DO, [1 0 0 0 0 0 1 0]);
                 WaitSecs(0.65);
                 outputSingleScan(DO, [0 0 0 0 0 0 1 0]);
                 WaitSecs(0.1);
             end
+            Screen('CopyWindow',window_queue{end},window);
+            Screen(window,'Flip');
+            WaitSecs(frame_time_queue(end));%feedback
+            Screen('CopyWindow',r,window);
+            Screen(window,'Flip');
             intertrial_interval = intertrial_interval_correct-gate_off_time;
             repeatcounter = repeatcounter + 1;
             IndexHist(CurrentClass) = CurrentClass;
         else
             AllData.trials(save_counter).Reward = 'No';
             dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass, correctcounter, 0,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode}
-            if Result > 0
+            if Result > 0%only complated trials
                 Screen('CopyWindow',window_queue{end},window);
                 Screen(window,'Flip');
                 WaitSecs(frame_time_queue(end));

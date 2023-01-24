@@ -15,7 +15,7 @@ Version = 'TrainBiasedODR_030_v0.21_06_29_22' ; % after code changes, change ver
 %   characters in the output data file                     2022_06_29 -ZW
 %% Parameters
 
-loc_mean = 15;                 % In degree, change before run
+loc_mean = 320;                 % In degree, change before run
 datain(1:4) = [1, 0.5, 3, 0.2];  % Default waiting times for each frame [fixation, cue, delay, saccade]
 datain(5) = nan;                 % Trial type - not used
 datain(6) = 2;                % Number of blocks. !!In this task, one for the sack of analysis. JZ
