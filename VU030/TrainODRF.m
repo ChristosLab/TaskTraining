@@ -31,12 +31,12 @@ datain(1:4) = [1 0.5 3 0.2];    %  Default waiting times for each frame [fixatio
 datain(5) = 3;                 %  Trial type
 datain(6) = 80;                %  Number of blocks
 datain(7) = 10;                %  Stimulus eccentricity
-datain(8) = 30;                 %  Radius in degree of fixation window
-datain(9) = 60;                 %  Radius in degree of target window
+datain(8) = 3;                 %  Radius in degree of fixation window
+datain(9) = 6;                 %  Radius in degree of target window
 datain(10) = 100;               %  Stimulus luminance as percentage (1 - 100) of color depth (typically 0 - 255)
 datain(11) = 0;                %  Helper luminance as percentage (1 - 100) of color depth
-datain(12) = 50;                %  Feedback luminance as percentage (1 - 100) of color depth
-numBurst = 1;
+datain(12) = 100;                %  Feedback luminance as percentage (1 - 100) of color depth
+numBurst = 3;
 % OutputFileNames = {'test_UNI0113'};
 % disp('using default values')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,7 +129,7 @@ totaltrials = numel(GeneralVars.ClassStructure);
 % Stimulus Windows
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[window, f, r, WindowStructure, AllCoordinates] = CreateWindowStructODR_030(Display, vstruct, GeneralVars.ClassStructure);
+[window, f, r, WindowStructure, AllCoordinates] = CreateWindowStructODRF_030(Display, vstruct, GeneralVars.ClassStructure);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Save Parameters
@@ -193,7 +193,7 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
         %%  Trial loop paramters
         %                       {'Fixation'; 'Cue'; 'Delay'; 'Target'}
         %   Required duration of fixation
-        frame_time_queue      = [datain(1),datain(2),datain(3),datain(4),datain(2)];
+        frame_time_queue      = [datain(1),datain(2),datain(3),datain(4),0.2];
         %   Off-screen windows to be copied for each frame
         window_queue          = {f; WindowStructure(CurrentClass).frame(1).end; ...
             f; WindowStructure(CurrentClass).frame(2).end; ...
@@ -265,7 +265,7 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
             Statecode = Statecode + 1;
         end
         %% Trial end: feedback and reward
-        finishStatecode = sum(aqusition_time_queue > 0) + numel(aqusition_time_queue);
+        finishStatecode = sum(aqusition_time_queue > 0) + numel(aqusition_time_queue);% exclude feedack frame
         if Statecode == finishStatecode
             Result = 1;
             %     wavesoundplay('correct.wav',0.6);
@@ -291,9 +291,10 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
             AllData.trials(save_counter).Reward = 'Yes';
             correctcounter = correctcounter + 1;
             dataout(outputcounter,1:7) = {outputcounter-blockcounter, CurrentClass,correctcounter, 1,ReactionTime,GeneralVars.ClassStructure(CurrentClass).Notes,Statecode}
+                        WaitSecs(0.2);
             Screen('CopyWindow',window_queue{end},window);
             Screen(window,'Flip');
-            WaitSecs(frame_time_queue(end));
+            WaitSecs(0.2);
             Screen('CopyWindow',r,window);
             Screen(window,'Flip');  %feedback
             for burst=1:numBurst
@@ -311,7 +312,7 @@ while (BreakState ~= 1) && (blockcounter <= totalblocks)
             if Result > 0
                 Screen('CopyWindow',window_queue{end},window);
                 Screen(window,'Flip');
-                WaitSecs(frame_time_queue(end));
+                WaitSecs(0.2);
                 Screen('CopyWindow',r,window);
                 Screen(window,'Flip');
             end
